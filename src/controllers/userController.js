@@ -1,5 +1,6 @@
 var User = require('../models/user');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 //sign up
 exports.userRegister = (req, res) => {
@@ -31,7 +32,10 @@ exports.userLogin = (req, res) => {
 
         var passwordIsValid = bcrypt.compareSync(req.body.password, user.password);
         if (passwordIsValid){
-            res.status(200).send("user has succcessfully been logged in");
+            var token = jwt.sign({id: user._id, role: "admin"}, "supersecret", {
+                expiresIn: 86400 //expires in 24 hours
+            });
+            res.status(200).send({auth: true, token: token});
         }
         else{
             res.status(403).send("username/password is invalid");
